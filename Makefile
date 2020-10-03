@@ -1,24 +1,32 @@
 # This file is used for repository management
 
 # Project metadata
-NAME ?= hadolint
-PROJECT_DEFAULT_BRANCH ?= master
+export NAME ?= hadolint
+export PROJECT_DEFAULT_BRANCH ?= master
 
 # Using POSIX sh to be POSIX compatible
-SHELL ?= sh
+export SHELL ?= sh
 
 # Command overrides
-STACK ?= wrappers/commands/stack.sh
-MKDIR ?= mkdir
-RM ?= rm
-CHMOD ?= chmod
-SHELLCHECK ?= shellcheck
-UNAME ?= uname
-SED ?= sed
-CAT ?= cat
+export STACK ?= stack
+export MKDIR ?= mkdir
+export RM ?= rm
+export CHMOD ?= chmod
+export SHELLCHECK ?= shellcheck
+export UNAME ?= uname
+export SED ?= sed
+export CAT ?= cat
+export LS ?= ls
+
+# Wrappers
+export WRAP_STACK ?= $(PWD)/wrappers/commands/stack.sh
+
+# Function overrides
+export DIE ?= die
+export CP4C ?= cp4c
 
 # File hierarchy overrides
-BUILD ?= $(PWD)/build
+export BUILD ?= $(PWD)/build
 
 # System metadata
 KERNEL ?= $(shell $(UNAME) -s)
@@ -31,22 +39,21 @@ all: list
 
 #@ List all targets
 list:
-	@ true \
-		&& grep -A 1 "^#@.*" Makefile | sed s/--//gm | sed s/:.*//gm | sed "s/#@/#/gm" | while IFS= read -r line; do \
-			case "$$line" in \
-				"#"*|"") printf '%s\n' "$$line" ;; \
-				*) printf '%s\n' "make $$line"; \
-			esac; \
-		done
+	@ grep -A 1 "^#@.*" Makefile | sed s/--//gm | sed s/:.*//gm | sed "s/#@/#/gm" | while IFS= read -r line; do \
+		case "$$line" in \
+			"#"*|"") printf '%s\n' "$$line" ;; \
+			*) printf '%s\n' "make $$line"; \
+		esac; \
+	done
 
 # WARNING(Krey): This task is halting on systems with less then 4GB tempfs
-# FIXME-QA(Krey): Build process taken from https://ci.appveyor.com/project/hadolint/hadolint/branch/master#L33 need peer-review
+# FIXME-QA(Krey): Build process taken from https://ci.appveyor.com/project/hadolint/hadolint/brin	ranch/master#L33 need peer-review
 # FIXME: Implement a method to install stack if it's not installed
 #@ Initiate the build
 build:
-	@ $(STACK) --version 1>/dev/null
 	@ [ -d "$(BUILD)" ] || "$(MKDIR)" "$(BUILD)"
 	@ [ -d "$(BUILD)/$(NAME)" ] || "$(MKDIR)" "$(BUILD)/$(NAME)"
+	@ $(WRAP_STACK) --version 1>/dev/null
 	@ $(STACK) --no-terminal --install-ghc test --only-dependencies --keep-going
 	@ $(STACK) --no-terminal --local-bin-path "$(BUILD)/$(NAME)" install --flag hadolint:static
 
@@ -73,7 +80,7 @@ lint-changed-shellcheck:
 
 #@ Runs the test of the software
 test: build
-	@ $(STACK) test
+	@ $(WRAP_STACK) test
 
 #@ Cleans the build result
 clean:

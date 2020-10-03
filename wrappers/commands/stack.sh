@@ -1,25 +1,16 @@
 #!/bin/sh
 # shellcheck shell=sh # Written to be POSIX-compatible
 
+###! Wrapper to install package with command 'stack' on demand
+###! Expected to be used only as part of make step
+
 set -e # Exit on false
 
 . scripts/libs/cp4c.shlib
 . scripts/libs/die.shlib
 
-# FIXME: Get this value from makefile
-KERNEL="$(uname -s)"
-
-# Krey: Command overrides
-[ -n "$BREW" ] || STACK=brew
-[ -n "$CHOCO" ] || CHOCO=choco
-[ -n "$STACK" ] || STACK=stack
-[ -n "$APT_GET" ] || APT_GET=apt-get
-
-# Krey: Function overrides
-[ -n "$CP4C" ] || CP4C=cp4c
-[ -n "$DIE" ] || DIE=die
-
 # Krey: Check if command 'stack' is available if not try to install it
+# shellcheck disable=SC2086 # We do not expect quotes over command overrides
 if $CP4C $STACK; then
 	$TRUE
 elif ! $CP4C $STACK; then

@@ -3,15 +3,6 @@
 
 # Created by Jacob Hrbek identified using a GPG identifier assigned to the electronic mail <kreyren@rixotstudio.cz> according to the keyserver https://keys.openpgp.org under GPLv3 license <https://www.gnu.org/licenses/gpl-3.0.html> in 03/10/2020-EU 07:02:04 CEST
 
-# Command overrides
-# shellcheck disable=SC2209 # Invalid as command is not expecting to return anything
-[ -n "$COMMAND" ] || COMMAND=command
-[ -n "$FALSE" ] || FALSE=false
-[ -n "$GREP" ] || GREP=grep
-[ -n "$TRUE" ] || TRUE=true
-[ -n "$SED" ] || SED=sed
-[ -n "$LS" ] || LS=ls
-
 ###! Checks if the command 'command' is executable from current environment
 ###! SYNOPSIS: cp4c [command]
 cp4c() { # Check Path 4 Command
@@ -19,15 +10,23 @@ cp4c() { # Check Path 4 Command
 	command="$1"
 
 	# Krey: Check if 'command' is available in $PATH
+	# shellcheck disable=SC2153 # Invalid as we are defining these through makefile
 	if $COMMAND; then
-		# shellcheck disable=SC2086 # Krey: Quotes are unexpected to allow command overrides
-		# shellcheck disable=SC2046 # Krey: Quotes are unexpected as this should only return number or fail
-		return $($COMMAND -v "$command" 1>/dev/null)
+		if $COMMAND -v "$command" 1>/dev/null; then
+			# shellcheck disable=SC2046 # We do not expect double-quottes for command overrides
+			return $($TRUE; $PRINTF "$?\n")
+		elif ! $COMMAND -v "$command" 1>/dev/null; then
+			# shellcheck disable=SC2046 # We do not expect double-quottes for command overrides
+			return $($FALSE; $PRINTF "$?\n")
+		else
+			die unexpected
+		fi
 	elif ! $COMMAND && [ -n "$PATH" ]; then
 		for dirs in $($PRINTF '%s\n' "$PATH" | $SED s/:/\ /g); do
+			# shellcheck disable=SC2046 # We do not expect double-quottes for command overrides
 			if $LS "$dirs" | $GREP "$command"; then
-				# shellcheck disable=SC2086 # Krey: Quotes are unexpected to allow command overrides
-				return $TRUE
+				# shellcheck disable=SC2046 # We do not expect double-quottes for command overrides
+				return $($TRUE; $PRINTF "$?\n")
 			elif ! $LS "$dirs" | $GREP "$command"; then
 				$TRUE
 			else
@@ -36,7 +35,8 @@ cp4c() { # Check Path 4 Command
 		done
 
 		# Krey: Return false if 'command' not found in $PATH
-		return $FALSE
+		# shellcheck disable=SC2046 # We do not expect double-quottes for command overrides
+		return $($FALSE; $PRINTF "$?\n")
 	else
 		die unexpected
 	fi

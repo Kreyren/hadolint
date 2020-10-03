@@ -3,53 +3,63 @@
 
 set -e # Exit on false
 
-# shellcheck source=scripts/libs/cp4c.shlib
-. "$(pwd)/scripts/libs/cp4c.shlib"
-. "$(pwd)/scripts/libs/die.shlib"
+. scripts/libs/cp4c.shlib
+. scripts/libs/die.shlib
 
-# Command overrides
-STACK=stack
-BREW=brew
-CHOCO=choco
-APT_GET=apt-get
+# FIXME: Get this value from makefile
+KERNEL="$(uname -s)"
 
-# Check if command 'stack' is available
-if cp4c stack; then
-	true
-elif ! cp4c stack; then
+# Krey: Command overrides
+[ -n "$STACK" ] || BREW=brew
+[ -n "$CHOCO" ] || CHOCO=choco
+[ -n "$STACK" ] || STACK=stack
+[ -n "$APT_GET" ] || APT_GET=apt-get
+
+# Krey: Function overrides
+[ -n "$CP4C" ] || CP4C=cp4c
+[ -n "$DIE" ] || DIE=die
+
+# Krey: Check if command 'stack' is available if not try to install it
+if $CP4C $STACK; then
+	$TRUE
+elif ! $CP4C $STACK; then
 	case "$KERNEL" in
 		linux)
-			if cp4c apt-get; then
+			if $CP4C $APT_GET; then
 				case "$DISTRO" in
 					debian|devuan)
-						printf 'WARNING: %s\n' "As of 03/10/2020-EU $DISTRO does not have package 'haskell-stack' in stable/testing release so you might need to adjust your sources.list to use unstable target"
+						$PRINTF 'WARNING: %s\n' "As of 03/10/2020-EU $DISTRO does not have package 'haskell-stack' in stable/testing release so you might need to adjust your sources.list to use unstable target"
 						$APT_GET install --yes haskell-stack
 					;;
 					*) die fixme "Distribution '$DISTRO' is not implemented to install required 'stack' command on kernel '$KERNEL'"
 				esac
+			else
+				$DIE unexpected
 			fi
 		;;
 		darwin)
 			# Check for options to install stack
-			if cp4c $BREW; then
+			if $CP4C $BREW; then
 				$BREW install haskell-stack
-			elif ! cp4c $BREW; then
-				die fixme "Not implemented - We require command 'stack' which is not available and this darwin system doesn't have homebrew installed"
+			elif ! $CP4C $BREW; then
+				$DIE fixme "Not implemented - We require command 'stack' which is not available and this darwin system doesn't have homebrew installed"
 			else
-				die unexpected
+				$DIE unexpected
 			fi
 		;;
 		windows)
-			if cp4c $CHOCO; then
+			if $CP4C $CHOCO; then
 				$CHOCO install haskell-stack
-			elif ! cp4c $CHOCO; then
-				die false "Unable to install package 'haskell-stack' to get command 'stack' required for building"
+			elif ! $CP4C $CHOCO; then
+				$DIE false "Unable to install package 'haskell-stack' to get command 'stack' required for building"
 			else
-				die unexpected
+				$DIE unexpected
 			fi
 		;;
-		*) die 26 "Kernel '$KERNEL' is not implemented"
+		*) $DIE 26 "Kernel '$KERNEL' is not implemented"
 	esac
+else
+	$DIE unexpected
 fi
 
 # Execute

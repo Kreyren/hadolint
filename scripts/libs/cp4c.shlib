@@ -15,10 +15,10 @@
 ###! Checks if the command 'command' is executable from current environment
 ###! SYNOPSIS: cp4c [command]
 cp4c() { # Check Path 4 Command
-	# Define arguments
+	# Krey: Define arguments
 	command="$1"
 
-	# Check if 'command' is available in $PATH
+	# Krey: Check if 'command' is available in $PATH
 	if $COMMAND; then
 		# shellcheck disable=SC2086 # Krey: Quotes are unexpected to allow command overrides
 		# shellcheck disable=SC2046 # Krey: Quotes are unexpected as this should only return number or fail
@@ -26,7 +26,7 @@ cp4c() { # Check Path 4 Command
 	elif ! $COMMAND && [ -n "$PATH" ]; then
 		for dirs in $($PRINTF '%s\n' "$PATH" | $SED s/:/\ /g); do
 			if $LS "$dirs" | $GREP "$command"; then
-				# shellcheck disable=SC2086 # Quotes are unexpected to allow command overrides
+				# shellcheck disable=SC2086 # Krey: Quotes are unexpected to allow command overrides
 				return $TRUE
 			elif ! $LS "$dirs" | $GREP "$command"; then
 				$TRUE
@@ -35,7 +35,7 @@ cp4c() { # Check Path 4 Command
 			fi
 		done
 
-		# Command not found in $PATH
+		# Krey: Return false if 'command' not found in $PATH
 		return $FALSE
 	else
 		die unexpected

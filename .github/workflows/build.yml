@@ -10,19 +10,10 @@ on:
 
 strategy:
   matrix:
-    containers: [ debian:testing, fedora:latest, ]
-    runners: [ windows-latest, macos-latest ]
+    runners: [ ubuntu-latest, macos-latest, windows-latest ]
 
 jobs:
-  build-namespace-container:
-    runs-on: ubuntu-latest
-    container: ${{ matrix.containers }}
-    steps:
-      - name: Pulling git dir..
-        uses: actions/checkout@v2
-      - name: Building..
-        run: make build
-  build-virtual-container:
+  build:
     runs-on: ${{ matrix.runners }}
     steps:
       - name: Pulling git dir..

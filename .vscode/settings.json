@@ -3,5 +3,8 @@
 	"shellcheck.customArgs": [
 		"--external-sources"
 	],
-	"shellcheck.run": "onSave"
+	"shellcheck.run": "onSave",
+	"shellcheck.enableQuickFix": true,
+	// KREY: Required to allow shellcheck to be able to parse --external-sources argument
+	"shellcheck.useWorkspaceRootAsCwd": true
 }

@@ -2,23 +2,28 @@
 
 # Project metadata
 NAME ?= hadolint
+PROJECT_DEFAULT_BRANCH ?= master
 
 # Using POSIX sh to be POSIX compatible
 SHELL ?= sh
 
 # Command overrides
-STACK ?= wrappers/commands/stack.sh
+STACK ?= stack
 MKDIR ?= mkdir
 RM ?= rm
 CHMOD ?= chmod
+SHELLCHECK ?= shellcheck
+UNAME ?= uname
+SED ?= sed
+CAT ?= cat
 
 # File hierarchy overrides
 BUILD ?= $(PWD)/build
 
 # System metadata
-KERNEL ?= $(shell uname -s)
-DISTRO ?= $(shell cat /etc/os-release | grep ^ID\= | sed s/^ID\=//g)
-RELEASE ?= $(shell cat /etc/os-release | grep ^VERSION_CODENAME\= | sed s/^VERSION_CODENAME\=//g | sed s/\"//g)
+KERNEL ?= $(shell $(UNAME) -s)
+DISTRO ?= $(shell $(CAT) /etc/os-release | $(GREP) ^ID\= | $(SED) s/^ID\=//g)
+RELEASE ?= $(shell $(CAT) /etc/os-release | $(GREP) ^VERSION_CODENAME\= | $(SED) s/^VERSION_CODENAME\=//g | $(SED) s/\"//g)
 
 .PHONY: all build run test
 
@@ -34,13 +39,12 @@ list:
 			esac; \
 		done
 
-build-deps:
-	@ case "$
-
+# WARNING(Krey): This task is halting on systems with less then 4GB tempfs
 # FIXME-QA(Krey): Build process taken from https://ci.appveyor.com/project/hadolint/hadolint/branch/master#L33 need peer-review
+# FIXME: Implement a method to install stack if it's not installed
 #@ Initiate the build
 build:
-	@ $(STACK) --version 1>/dev/null 
+	@ $(STACK) --version 1>/dev/null
 	@ [ -d "$(BUILD)" ] || "$(MKDIR)" "$(BUILD)"
 	@ [ -d "$(BUILD)/$(NAME)" ] || "$(MKDIR)" "$(BUILD)/$(NAME)"
 	@ $(STACK) --no-terminal --install-ghc test --only-dependencies --keep-going
@@ -56,7 +60,16 @@ lint: lint-shellcheck
 
 #@ Run shellcheck on supported files
 lint-shellcheck:
-	@ find . -name *.sh -or -name *.bash -or -name *.zsh -type f | shellcheck -
+	@ find . -name *.sh -or -name *.bash -or -name *.zsh -type f | $(SHELLCHECK) -
+
+#@ Run shellcheck agains only changed files in comparison to PROJECT_DEFAULT_BRANCH
+lint-changed-shellcheck:
+	@ for file in $$(git diff --name-only "$(PROJECT_DEFAULT_BRANCH)" | grep ".*\.(sh|bash|zsh)$$" | tr '\n' ' '); do \
+		true \
+			&& $(PRINTF) "Linting file '%1s' type '%2s' using command '$(SHELLCHECK)'\\n" "$$file" "$$(file "$$file" | sed "s/^.*\:\ //g")" \
+			&& $(SHELLCHECK) $(SHELLCHECK_FLAGS) "$$file" \
+			&& $(PRINTF) '%s\n' "Finished checking file '$$file'" \
+		; done
 
 #@ Runs the test of the software
 test: build

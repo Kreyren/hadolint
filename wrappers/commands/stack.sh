@@ -10,7 +10,7 @@ set -e # Exit on false
 KERNEL="$(uname -s)"
 
 # Krey: Command overrides
-[ -n "$STACK" ] || BREW=brew
+[ -n "$BREW" ] || STACK=brew
 [ -n "$CHOCO" ] || CHOCO=choco
 [ -n "$STACK" ] || STACK=stack
 [ -n "$APT_GET" ] || APT_GET=apt-get

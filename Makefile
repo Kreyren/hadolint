@@ -8,7 +8,7 @@ PROJECT_DEFAULT_BRANCH ?= master
 SHELL ?= sh
 
 # Command overrides
-STACK ?= stack
+STACK ?= wrappers/commands/stack.sh
 MKDIR ?= mkdir
 RM ?= rm
 CHMOD ?= chmod

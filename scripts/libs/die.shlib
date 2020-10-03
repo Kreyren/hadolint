@@ -1,0 +1,42 @@
+#!/bin/sh
+# shellcheck shell=sh # Written to be POSIX-compatible
+
+# Created by Jacob Hrbek identified using a GPG identifier assigned to the electronic mail <kreyren@rixotstudio.cz> according to the keyserver https://keys.openpgp.org under GPLv3 license <https://www.gnu.org/licenses/gpl-3.0.html> in 03/10/2020-EU 07:02:04 CEST
+
+set -e # Exit on false
+
+# Command overrides
+[ -n "$TRUE" ] || TRUE=true
+# shellcheck disable=SC2209 # Krey: We do not expect these to return anything here
+[ -n "$EXIT" ] || EXIT=exit
+[ -n "$FALSE" ] || FALSE=false
+# shellcheck disable=SC2209 # Krey: We do not expect these to return anything here
+[ -n "$PRINTF" ] || PRINTF=printf
+
+###! Simple assertion wrapped designed to return specified exit code 'exitCode' and return message 'message'
+###! SYNOPSIS: die [exitCode] [message]
+die() {
+	exitCode="$1"
+	message="$2"
+
+	case "$exitCode" in
+		true)
+			$PRINTF 'SUCCESS: %s\n' "$message"
+			$EXIT $TRUE ;;
+		false)
+			$PRINTF 'FATAL: %s\n' "$message"
+			$EXIT $FALSE ;;
+		fixme)
+			$PRINTF 'FIXME: %s\n' "$message"
+			$EXIT 26 ;;
+		bug)
+			$PRINTF 'BUG: %s\n' "$message"
+			$EXIT 250 ;;
+		unexpected)
+			$PRINTF 'UNEXPECTED: %s\n' "$message"
+			$EXIT 255 ;;
+		*)
+			$PRINTF '%s\n' "Invalid argument '$exitCode' was provided in function 'die'"
+			$EXIT 2
+	esac
+}

@@ -1,0 +1,17 @@
+---
+# This is a configuration file for DroneCI <https://drone.io>
+# WARNING(Krey): Affected by https://github.com/drone/drone/issues/1021
+# FIXME(Krey): Once https://github.com/drone/drone/issues/1021 is resolve this needs refactor
+kind: pipeline
+type: docker
+name: default
+platform:
+  os: linux
+  arch: amd64
+environment:
+    DEBIAN_FRONTEND: noninteractive
+steps:
+- name: Build
+  image: debian:testing
+  commands:
+    - make build

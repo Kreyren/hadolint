@@ -1,0 +1,20 @@
+name: Shellcheck
+
+# Relevant to events - https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows
+on: 
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+    paths:
+    - '**.sh'
+    - '**.bash'
+    - '**.zsh'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    container: debian:testing
+    steps:
+      - name: Pulling git dir..
+        uses: actions/checkout@v2
+      - name: Building..
+        run: make lint-shellcheck

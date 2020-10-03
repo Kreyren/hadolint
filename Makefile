@@ -7,13 +7,18 @@ NAME ?= hadolint
 SHELL ?= sh
 
 # Command overrides
-STACK ?= stack
+STACK ?= wrappers/commands/stack.sh
 MKDIR ?= mkdir
 RM ?= rm
 CHMOD ?= chmod
 
 # File hierarchy overrides
 BUILD ?= $(PWD)/build
+
+# System metadata
+KERNEL ?= $(shell uname -s)
+DISTRO ?= $(shell cat /etc/os-release | grep ^ID\= | sed s/^ID\=//g)
+RELEASE ?= $(shell cat /etc/os-release | grep ^VERSION_CODENAME\= | sed s/^VERSION_CODENAME\=//g | sed s/\"//g)
 
 .PHONY: all build run test
 
@@ -29,6 +34,8 @@ list:
 			esac; \
 		done
 
+build-deps:
+	@ case "$
 
 # FIXME-QA(Krey): Build process taken from https://ci.appveyor.com/project/hadolint/hadolint/branch/master#L33 need peer-review
 #@ Initiate the build

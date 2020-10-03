@@ -1,0 +1,31 @@
+name: Build
+
+# Relevant to events - https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows
+on: 
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+    paths:
+    - '**.hs'
+    - 'Makefile'
+
+strategy:
+  matrix:
+    containers: [ debian:testing, fedora:latest, ]
+    runners: [ windows-latest, macos-latest ]
+
+jobs:
+  build-namespace-container:
+    runs-on: ubuntu-latest
+    container: ${{ matrix.containers }}
+    steps:
+      - name: Pulling git dir..
+        uses: actions/checkout@v2
+      - name: Building..
+        run: make build
+  build-virtual-container:
+    runs-on: ${{ matrix.runners }}
+    steps:
+      - name: Pulling git dir..
+        uses: actions/checkout@v2
+      - name: Building..
+        run: make build

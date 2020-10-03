@@ -1,0 +1,1 @@
+Directory for libraries designed for shell

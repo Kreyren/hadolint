@@ -1,0 +1,7 @@
+{
+	"shellcheck.executablePath": "/usr/bin/shellcheck",
+	"shellcheck.customArgs": [
+		"--external-sources"
+	],
+	"shellcheck.run": "onSave"
+}

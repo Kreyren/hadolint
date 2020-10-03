@@ -51,6 +51,13 @@ run: build
 	@ [ -x "$(BUILD)/$(NAME)/$(NAME)" ] || "$(CHMOD)" +x "$(BUILD)/$(NAME)/$(NAME)""
 	@ "$(BUILD)/$(NAME)/$(NAME)" $(HADOLINT_ARGS)
 
+#@ Run linting software
+lint: lint-shellcheck
+
+#@ Run shellcheck on supported files
+lint-shellcheck:
+	@ find . -name *.sh -or -name *.bash -or -name *.zsh -type f | shellcheck -
+
 #@ Runs the test of the software
 test: build
 	@ $(STACK) test

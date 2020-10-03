@@ -17,4 +17,4 @@ jobs:
       - name: Pulling git dir..
         uses: actions/checkout@v2
       - name: Building..
-        run: make lint-shell
+        run: make lint-shellcheck
